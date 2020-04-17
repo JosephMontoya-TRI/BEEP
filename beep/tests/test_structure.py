@@ -607,8 +607,16 @@ class ProcessedCyclerRunTest(unittest.TestCase):
         self.assertIsInstance(loaded, ProcessedCyclerRun)
 
     def test_typing(self):
-        loaded = loadfn(self.pcycler_run_file)
-        self.assertEqual(loaded.summary.discharge_capacity.dtype, np.float16)
+        with open(self.pcycler_run_file) as f:
+            data = json.loads(f.read())
+        data['cycles_interpolated']['cycle_type'] = ['this'] * len(data['cycles_interpolated']['voltage'])
+        data['cycles_interpolated']['cycle_type'][0] = 'that'
+        data.pop('@module')
+        data.pop('@class')
+        loaded = ProcessedCyclerRun.from_dict(data)
+        # loaded = loadfn(self.pcycler_run_file)
+        self.assertEqual(loaded.summary.discharge_capacity.dtype, 'float32')
+        self.assertEqual(loaded.cycles_interpolated.cycle_type.dtype, 'category')
 
 
 

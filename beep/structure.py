@@ -1033,7 +1033,15 @@ class ProcessedCyclerRun(MSONable):
                     self.diagnostic_interpolated.to_dict("list") if self.diagnostic_interpolated is not None else None
                 }
 
-    SUMMARY_DTYPES = {"discharge_capacity": np.float16}
+    # Type schema for df
+    DF_DTYPES = {
+        "summary": {
+            "discharge_capacity": "float32",
+        },
+        "cycles_interpolated": {
+            "cycle_type": "category"
+        }
+    }
     @classmethod
     def from_dict(cls, d):
         """
@@ -1046,9 +1054,14 @@ class ProcessedCyclerRun(MSONable):
             beep.structure.ProcessedCyclerRun: deserialized ProcessedCyclerRun.
 
         """
+        for obj, dtype_dict in cls.DF_DTYPES.items():
+            for column, dtype in dtype_dict.items():
+                # TODO: refactor with pydash
+                if d.get(obj) is not None:
+                    if d[obj].get(column) is not None:
+                        d[obj][column] = pd.Series(d[obj][column], dtype=dtype)
+                
         d['cycles_interpolated'] = pd.DataFrame(d['cycles_interpolated'])
-        for column, dtype in cls.SUMMARY_DTYPES.items():
-            d['summary'][column] = np.array(d['summary'][column], dtype=dtype)
         d['summary'] = pd.DataFrame(d['summary'])
         d['diagnostic_summary'] = pd.DataFrame(d.get('diagnostic_summary'))
         d['diagnostic_interpolated'] = pd.DataFrame(d.get('diagnostic_interpolated'))
