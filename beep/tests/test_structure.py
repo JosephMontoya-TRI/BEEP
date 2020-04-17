@@ -606,6 +606,11 @@ class ProcessedCyclerRunTest(unittest.TestCase):
         loaded = ProcessedCyclerRun.auto_load(self.arbin_file)
         self.assertIsInstance(loaded, ProcessedCyclerRun)
 
+    def test_typing(self):
+        loaded = loadfn(self.pcycler_run_file)
+        self.assertEqual(loaded.summary.discharge_capacity.dtype, np.float16)
+
+
 
 class EISpectrumTest(unittest.TestCase):
     def setUp(self):

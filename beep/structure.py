@@ -1033,18 +1033,22 @@ class ProcessedCyclerRun(MSONable):
                     self.diagnostic_interpolated.to_dict("list") if self.diagnostic_interpolated is not None else None
                 }
 
+    SUMMARY_DTYPES = {"discharge_capacity": np.float16}
     @classmethod
     def from_dict(cls, d):
         """
+        MSONable deserialization method
 
         Args:
             d (dict): dictionary represenation.
 
         Returns:
             beep.structure.ProcessedCyclerRun: deserialized ProcessedCyclerRun.
+
         """
-        """MSONable deserialization method"""
         d['cycles_interpolated'] = pd.DataFrame(d['cycles_interpolated'])
+        for column, dtype in cls.SUMMARY_DTYPES.items():
+            d['summary'][column] = np.array(d['summary'][column], dtype=dtype)
         d['summary'] = pd.DataFrame(d['summary'])
         d['diagnostic_summary'] = pd.DataFrame(d.get('diagnostic_summary'))
         d['diagnostic_interpolated'] = pd.DataFrame(d.get('diagnostic_interpolated'))
